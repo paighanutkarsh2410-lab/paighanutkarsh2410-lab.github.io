@@ -88,72 +88,100 @@ function Card({ p, featured, flip, index, compact }: { p: Project; featured?: bo
   );
 }
 
-/** Phones: one row of cards you swipe sideways; it auto-advances and pauses while you touch it. */
+/**
+ * Phones: the cards glide past continuously and loop forever (the set is rendered twice and the
+ * scroll position wraps by one set width). Touching pauses it so the reader can swipe or read;
+ * it resumes on its own shortly after.
+ */
 function MobileCarousel() {
   const track = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
-  const [onScreen, setOnScreen] = useState(false);
-  const pausedUntil = useRef(0);
   const n = DATA.projects.length;
+  const items = [...DATA.projects, ...DATA.projects];
+
+  useEffect(() => {
+    const el = track.current;
+    if (!el) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const SPEED = 34; // px per second
+    let raf = 0, last = 0, pos = el.scrollLeft, onScreen = false, resumeAt = 0, touching = false;
+
+    const setWidth = () => {
+      const first = el.children[0] as HTMLElement, twin = el.children[n] as HTMLElement;
+      return twin && first ? twin.offsetLeft - first.offsetLeft : 0;
+    };
+    const updateActive = () => {
+      const w = setWidth();
+      if (!w) return;
+      const card = (el.children[0] as HTMLElement).offsetWidth + 16;
+      const x = ((el.scrollLeft % w) + w) % w;
+      setActive(Math.round(x / card) % n);
+    };
+
+    const tick = (t: number) => {
+      raf = requestAnimationFrame(tick);
+      const dt = last ? Math.min(64, t - last) : 16;
+      last = t;
+      if (!onScreen || touching || reduce || t < resumeAt) { pos = el.scrollLeft; return; }
+      const w = setWidth();
+      pos += (SPEED * dt) / 1000;
+      if (w && pos >= w) pos -= w; // seamless wrap onto the identical second set
+      el.scrollLeft = pos;
+    };
+
+    const io = new IntersectionObserver(([e]) => (onScreen = e.isIntersecting), { threshold: 0.3 });
+    io.observe(el);
+    const down = () => { touching = true; };
+    const up = () => { touching = false; resumeAt = performance.now() + 2500; };
+    const onScroll = () => {
+      // a manual swipe past either end wraps too, so it never runs out
+      const w = setWidth();
+      if (w && touching === false && el.scrollLeft < 2) { el.scrollLeft += w; pos = el.scrollLeft; }
+      updateActive();
+    };
+    el.addEventListener("touchstart", down, { passive: true });
+    el.addEventListener("touchend", up, { passive: true });
+    el.addEventListener("touchcancel", up, { passive: true });
+    el.addEventListener("pointerdown", down);
+    window.addEventListener("pointerup", up);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    raf = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(raf);
+      io.disconnect();
+      el.removeEventListener("touchstart", down);
+      el.removeEventListener("touchend", up);
+      el.removeEventListener("touchcancel", up);
+      el.removeEventListener("pointerdown", down);
+      window.removeEventListener("pointerup", up);
+      el.removeEventListener("scroll", onScroll);
+    };
+  }, [n]);
 
   const goTo = (i: number) => {
     const el = track.current;
     const card = el?.children[i] as HTMLElement | undefined;
     if (!el || !card) return;
-    el.scrollTo({ left: card.offsetLeft - (el.clientWidth - card.clientWidth) / 2, behavior: "smooth" });
+    el.scrollTo({ left: card.offsetLeft - 24, behavior: "smooth" });
   };
-
-  // which card is centred
-  useEffect(() => {
-    const el = track.current;
-    if (!el) return;
-    const onScroll = () => {
-      const mid = el.scrollLeft + el.clientWidth / 2;
-      let best = 0, d = Infinity;
-      [...el.children].forEach((c, i) => {
-        const h = c as HTMLElement;
-        const cd = Math.abs(h.offsetLeft + h.clientWidth / 2 - mid);
-        if (cd < d) { d = cd; best = i; }
-      });
-      setActive(best);
-    };
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
-
-  // only advance while the carousel is on screen
-  useEffect(() => {
-    const el = track.current;
-    if (!el) return;
-    const io = new IntersectionObserver(([e]) => setOnScreen(e.isIntersecting), { threshold: 0.4 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!onScreen || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const t = setInterval(() => {
-      if (Date.now() < pausedUntil.current) return;
-      goTo((active + 1) % n);
-    }, 4200);
-    return () => clearInterval(t);
-  }, [onScreen, active, n]);
-
-  const pause = () => { pausedUntil.current = Date.now() + 8000; };
 
   return (
     <div className="md:hidden">
       <div
         ref={track}
-        onTouchStart={pause}
-        onPointerDown={pause}
-        className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-6 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="-mx-6 flex gap-4 overflow-x-auto px-6 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         aria-roledescription="carousel"
         aria-label="Projects"
       >
-        {DATA.projects.map((p, i) => (
-          <div key={p.title} className="w-[84vw] max-w-[360px] shrink-0 snap-center" aria-roledescription="slide" aria-label={`${i + 1} of ${n}: ${p.title}`}>
-            <Card p={p} index={i} compact />
+        {items.map((p, i) => (
+          <div
+            key={`${p.title}-${i}`}
+            className="w-[84vw] max-w-[360px] shrink-0"
+            aria-roledescription="slide"
+            aria-label={`${(i % n) + 1} of ${n}: ${p.title}`}
+            aria-hidden={i >= n ? true : undefined}
+          >
+            <Card p={p} index={i % n} compact />
           </div>
         ))}
       </div>
@@ -164,7 +192,7 @@ function MobileCarousel() {
             type="button"
             aria-label={`Show ${p.title}`}
             aria-current={i === active}
-            onClick={() => { pause(); goTo(i); }}
+            onClick={() => goTo(i)}
             className={cn("h-1.5 rounded-full transition-all duration-300", i === active ? "w-6 bg-orange-500" : "w-1.5 bg-border")}
           />
         ))}
