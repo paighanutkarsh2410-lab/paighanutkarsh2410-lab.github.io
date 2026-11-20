@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
 import { ArrowUpRight } from "lucide-react";
 import { DATA } from "@/data/resume";
@@ -12,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 type Project = (typeof DATA.projects)[number];
 
-function Card({ p, featured, flip, index }: { p: Project; featured?: boolean; flip?: boolean; index: number }) {
+function Card({ p, featured, flip, index, compact }: { p: Project; featured?: boolean; flip?: boolean; index: number; compact?: boolean }) {
   return (
     <Tilt className="h-full" max={featured ? 4 : 7}>
       <MagicCard
@@ -47,17 +48,20 @@ function Card({ p, featured, flip, index }: { p: Project; featured?: boolean; fl
               {String(index + 1).padStart(2, "0")} · {p.dates}
             </div>
             <h3 className={cn("mt-3 font-semibold tracking-tighter", featured ? "text-4xl md:text-5xl" : "text-3xl")}>{p.title}</h3>
-            <div className="prose prose-sm mt-4 max-w-none text-pretty text-muted-foreground dark:prose-invert prose-strong:text-foreground">
+            <div className={cn("prose prose-sm mt-4 max-w-none text-pretty text-muted-foreground dark:prose-invert prose-strong:text-foreground", compact && "line-clamp-5")}>
               <Markdown>{p.description}</Markdown>
             </div>
             <div className="mt-5 flex flex-wrap gap-1.5">
-              {p.technologies.map((t) => (
+              {(compact ? p.technologies.slice(0, 5) : p.technologies).map((t) => (
                 <span key={t} className="rounded-full border border-border/70 bg-muted/40 px-2.5 py-0.5 font-mono text-[11px] text-muted-foreground">
                   {t}
                 </span>
               ))}
+              {compact && p.technologies.length > 5 && (
+                <span className="rounded-full px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground">+{p.technologies.length - 5}</span>
+              )}
             </div>
-            <div className="mt-auto flex flex-wrap gap-2 pt-7">
+            <div className={cn("mt-auto flex flex-wrap gap-2", compact ? "pt-5" : "pt-7")}>
               {p.links.map((l, i) => (
                 <a
                   key={l.href}
@@ -84,10 +88,95 @@ function Card({ p, featured, flip, index }: { p: Project; featured?: boolean; fl
   );
 }
 
+/** Phones: one row of cards you swipe sideways; it auto-advances and pauses while you touch it. */
+function MobileCarousel() {
+  const track = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(0);
+  const [onScreen, setOnScreen] = useState(false);
+  const pausedUntil = useRef(0);
+  const n = DATA.projects.length;
+
+  const goTo = (i: number) => {
+    const el = track.current;
+    const card = el?.children[i] as HTMLElement | undefined;
+    if (!el || !card) return;
+    el.scrollTo({ left: card.offsetLeft - (el.clientWidth - card.clientWidth) / 2, behavior: "smooth" });
+  };
+
+  // which card is centred
+  useEffect(() => {
+    const el = track.current;
+    if (!el) return;
+    const onScroll = () => {
+      const mid = el.scrollLeft + el.clientWidth / 2;
+      let best = 0, d = Infinity;
+      [...el.children].forEach((c, i) => {
+        const h = c as HTMLElement;
+        const cd = Math.abs(h.offsetLeft + h.clientWidth / 2 - mid);
+        if (cd < d) { d = cd; best = i; }
+      });
+      setActive(best);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // only advance while the carousel is on screen
+  useEffect(() => {
+    const el = track.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setOnScreen(e.isIntersecting), { threshold: 0.4 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!onScreen || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t = setInterval(() => {
+      if (Date.now() < pausedUntil.current) return;
+      goTo((active + 1) % n);
+    }, 4200);
+    return () => clearInterval(t);
+  }, [onScreen, active, n]);
+
+  const pause = () => { pausedUntil.current = Date.now() + 8000; };
+
+  return (
+    <div className="md:hidden">
+      <div
+        ref={track}
+        onTouchStart={pause}
+        onPointerDown={pause}
+        className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-6 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        aria-roledescription="carousel"
+        aria-label="Projects"
+      >
+        {DATA.projects.map((p, i) => (
+          <div key={p.title} className="w-[84vw] max-w-[360px] shrink-0 snap-center" aria-roledescription="slide" aria-label={`${i + 1} of ${n}: ${p.title}`}>
+            <Card p={p} index={i} compact />
+          </div>
+        ))}
+      </div>
+      <div className="mt-5 flex items-center justify-center gap-2">
+        {DATA.projects.map((p, i) => (
+          <button
+            key={p.title}
+            type="button"
+            aria-label={`Show ${p.title}`}
+            aria-current={i === active}
+            onClick={() => { pause(); goTo(i); }}
+            className={cn("h-1.5 rounded-full transition-all duration-300", i === active ? "w-6 bg-orange-500" : "w-1.5 bg-border")}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function ProjectsSection() {
   const [first, ...rest] = DATA.projects;
   return (
-    <section id="projects" className="relative mx-auto max-w-6xl scroll-mt-10 px-6 py-24 md:py-32">
+    <section id="projects" className="relative mx-auto max-w-6xl scroll-mt-10 px-6 py-16 md:py-32">
       <SectionHeading
         eyebrow="Selected work"
         title={
@@ -97,7 +186,10 @@ export default function ProjectsSection() {
         }
         sub="Each one ships through GitOps, is watched by real SLOs, and has been broken on purpose to prove it recovers."
       />
-      <div className="grid gap-5 md:gap-6">
+      <Reveal className="md:hidden">
+        <MobileCarousel />
+      </Reveal>
+      <div className="hidden gap-5 md:grid md:gap-6">
         <Reveal>
           <Card p={first} featured index={0} />
         </Reveal>

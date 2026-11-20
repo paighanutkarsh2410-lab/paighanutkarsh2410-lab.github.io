@@ -171,7 +171,7 @@ export default function Tunnel() {
       ref={ref}
       id="tunnel"
       aria-label="Walk-through of projects, numbers and experience"
-      style={{ height: `${Math.round((panels.length * 90 + 170) * (mobile ? 1.1 : 1))}vh` }}
+      style={{ height: `${Math.round(lite ? panels.length * 55 + 110 : panels.length * 90 + 170)}vh` }}
       className="relative"
     >
       <div
