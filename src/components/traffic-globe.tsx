@@ -52,6 +52,10 @@ export default function TrafficGlobe({ dark }: { dark: boolean }) {
   const [rps, setRps] = useState(1182);
   const [visible, setVisible] = useState(true);
   const reduce = useMemo(() => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches, []);
+  // phones: lower render resolution, no MSAA, coarser hex grid. A 3x WebGL canvas with anti-aliasing
+  // is ~100 MB of GPU memory on its own, and iOS kills tabs that go over budget.
+  const phone = useMemo(() => typeof window !== "undefined" && (window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768), []);
+  const rendererConfig = useMemo(() => ({ antialias: !phone, alpha: true, powerPreference: "low-power" as const }), [phone]);
 
   const target = failed ? SECONDARY : PRIMARY;
 
@@ -92,13 +96,14 @@ export default function TrafficGlobe({ dark }: { dark: boolean }) {
   const onReady = useCallback(() => {
     const g = globe.current;
     if (!g) return;
+    g.renderer().setPixelRatio(Math.min(window.devicePixelRatio || 1, phone ? 1.25 : 2));
     g.pointOfView({ lat: 18, lng: 70, altitude: 2.15 }, 0);
     const c = g.controls();
     c.enableZoom = false;
     c.autoRotate = !reduce;
     c.autoRotateSpeed = 0.55;
     c.enableDamping = true;
-  }, [reduce]);
+  }, [reduce, phone]);
 
   // a steady stream of requests into the active region
   useEffect(() => {
@@ -169,6 +174,7 @@ export default function TrafficGlobe({ dark }: { dark: boolean }) {
     <div ref={wrap} className="relative aspect-square w-full">
       <Globe
         ref={globe}
+        rendererConfig={rendererConfig}
         width={size}
         height={size}
         backgroundColor="rgba(0,0,0,0)"
@@ -178,7 +184,7 @@ export default function TrafficGlobe({ dark }: { dark: boolean }) {
         atmosphereAltitude={0.2}
         onGlobeReady={onReady}
         hexPolygonsData={land}
-        hexPolygonResolution={3}
+        hexPolygonResolution={phone ? 2 : 3}
         hexPolygonMargin={0.55}
         hexPolygonUseDots
         hexPolygonColor={hexColor}

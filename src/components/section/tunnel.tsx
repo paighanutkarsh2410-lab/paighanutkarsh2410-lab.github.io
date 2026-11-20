@@ -113,6 +113,7 @@ export default function Tunnel() {
   const ref = useRef<HTMLElement>(null);
   const [vw, setVw] = useState(1440);
   const [vh, setVh] = useState(900);
+  const [coarse, setCoarse] = useState(false);
 
   useEffect(() => {
     const on = () => {
@@ -120,6 +121,7 @@ export default function Tunnel() {
       setVh(window.innerHeight);
     };
     on();
+    setCoarse(window.matchMedia("(pointer: coarse)").matches);
     window.addEventListener("resize", on);
     return () => window.removeEventListener("resize", on);
   }, []);
@@ -127,6 +129,9 @@ export default function Tunnel() {
   const panels = buildPanels();
   const END = LEAD + panels.length * GAP + 900; // stop just in front of the monogram
   const mobile = vw < 768;
+  // phones and tablets: no giant 3D planes. Each wall is a texture of several hundred MB at 3x,
+  // which is enough for iOS Safari to kill and reload the tab.
+  const lite = mobile || coarse;
   const pw = mobile ? Math.min(vw * 0.86, 360) : Math.min(vw * 0.44, 660);
   const ph = pw * 0.7;
   const spread = mobile ? vw * 0.05 : Math.min(vw * 0.2, 300);
@@ -159,7 +164,7 @@ export default function Tunnel() {
     WebkitMaskImage: "linear-gradient(90deg, #000 0%, rgba(0,0,0,.6) 35%, transparent 75%)",
     maskImage: "linear-gradient(90deg, #000 0%, rgba(0,0,0,.6) 35%, transparent 75%)",
   });
-  const DEPTH = 5200;
+  const DEPTH = 3600;
 
   return (
     <section
@@ -178,10 +183,27 @@ export default function Tunnel() {
           my.set(e.clientY / window.innerHeight - 0.5);
         }}
       >
-        {/* far glow at the end of the corridor */}
-        <div className="pointer-events-none absolute left-1/2 top-1/2 size-[38vmin] -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange-500/30 blur-[90px]" />
+        {/* far glow at the end of the corridor (a gradient, not a blur filter: far cheaper on phones) */}
+        <div className="pointer-events-none absolute left-1/2 top-1/2 size-[70vmin] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(249,115,22,.32)_0%,rgba(249,115,22,.12)_35%,transparent_70%)]" />
+
+        {lite && (
+          <svg aria-hidden className="pointer-events-none absolute inset-0 size-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <g stroke="rgba(249,115,22,.35)" strokeWidth="1" vectorEffect="non-scaling-stroke" fill="none">
+              {[[0, 0], [100, 0], [0, 100], [100, 100], [25, 100], [75, 100], [0, 75], [100, 75], [0, 25], [100, 25]].map(([x, y], i) => (
+                <line key={i} x1="50" y1="50" x2={x} y2={y} vectorEffect="non-scaling-stroke" />
+              ))}
+            </g>
+            <g className="tunnel-rings" stroke="rgba(249,115,22,.4)" fill="none">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <rect key={i} x="0" y="0" width="100" height="100" vectorEffect="non-scaling-stroke" style={{ animationDelay: `${-i * 1.2}s` }} />
+              ))}
+            </g>
+          </svg>
+        )}
 
         <motion.div className="absolute inset-0" style={{ transformStyle: "preserve-3d", rotateY: swayY, rotateX: swayX }}>
+          {!lite && (
+            <>
           {/* corridor surfaces — they slide with the camera so the grid streams past */}
           <motion.div
             className="absolute top-0 h-full"
@@ -220,6 +242,8 @@ export default function Tunnel() {
             }}
           />
 
+            </>
+          )}
           <motion.div className="absolute inset-0" style={{ transformStyle: "preserve-3d", transform: worldZ }}>
             {panels.map((p, i) => (
               <PanelInWorld key={i} panel={p} z={LEAD + i * GAP} cam={cam} w={pw} h={ph} spread={spread} />

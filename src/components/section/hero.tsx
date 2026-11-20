@@ -33,14 +33,14 @@ export default function Hero() {
     <section ref={ref} id="hero" className="relative isolate min-h-[100svh] overflow-hidden">
       <Particles
         className="absolute inset-0 -z-10"
-        quantity={140}
+        quantity={typeof window !== "undefined" && window.innerWidth < 768 ? 45 : 140}
         ease={70}
         staticity={40}
         size={0.5}
         color={dark ? "#ffb37a" : "#7c2d12"}
         refresh
       />
-      <div className="pointer-events-none absolute -z-10 left-1/2 top-[-20%] h-[70vh] w-[90vw] -translate-x-1/2 rounded-full bg-orange-500/15 blur-[120px] dark:bg-orange-500/20" />
+      <div className="pointer-events-none absolute -z-10 left-1/2 top-[-30%] h-[100vh] w-[120vw] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(249,115,22,.2)_0%,rgba(249,115,22,.07)_40%,transparent_70%)]" />
 
       <div className="mx-auto grid min-h-[100svh] max-w-6xl grid-cols-1 items-center gap-6 px-6 pt-24 pb-28 lg:grid-cols-[1.15fr_1fr]">
         <motion.div style={reduce ? undefined : { y: textY, opacity: textOpacity }} className="relative z-10">

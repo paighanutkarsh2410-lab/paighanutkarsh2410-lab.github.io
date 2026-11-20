@@ -331,3 +331,12 @@
 @media (prefers-reduced-motion: reduce) {
   [class*="animate-[arrival-"], [class*="animate-[spin_"] { animation: none !important; }
 }
+
+/* phone tunnel: rings drift toward the viewer */
+.tunnel-rings rect { transform-box: view-box; transform-origin: 50% 50%; animation: tunnel-ring 6s linear infinite; }
+@keyframes tunnel-ring {
+  0% { transform: scale(0.04); opacity: 0; }
+  25% { opacity: 0.9; }
+  100% { transform: scale(1.15); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .tunnel-rings rect { animation: none; opacity: .3; transform: scale(.5); } }

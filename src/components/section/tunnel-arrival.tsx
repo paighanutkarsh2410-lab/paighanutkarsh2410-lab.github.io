@@ -83,7 +83,7 @@ export function TunnelArrival({ progress, mobile }: { progress: MotionValue<numb
             />
           ))}
       </motion.div>
-      <motion.div style={{ opacity: glow }} className="absolute left-1/2 top-1/2 size-[46vmin] -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange-500/40 blur-[110px]" />
+      <motion.div style={{ opacity: glow }} className="absolute left-1/2 top-1/2 size-[90vmin] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(249,115,22,.45)_0%,rgba(249,115,22,.15)_35%,transparent_68%)]" />
 
       {/* orbiting projects */}
       <div className="absolute left-1/2 top-1/2 z-[2] size-0">
