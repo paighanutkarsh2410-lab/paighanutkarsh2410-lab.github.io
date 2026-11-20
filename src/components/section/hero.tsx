@@ -62,9 +62,18 @@ export default function Hero() {
             <TextAnimate as="span" by="character" animation="blurInUp" duration={0.8} once accessible={false} className="block whitespace-nowrap">
               Utkarsh
             </TextAnimate>
-            <TextAnimate as="span" by="character" animation="blurInUp" duration={0.8} delay={0.25} once accessible={false} className="block whitespace-nowrap bg-gradient-to-r from-foreground via-foreground to-orange-400/90 bg-clip-text text-transparent">
+            {/* Safari won't paint background-clip:text through per-letter animated children,
+                so the gradient word animates as one piece */}
+            <motion.span
+              aria-hidden
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
+              className="block whitespace-nowrap bg-gradient-to-r from-foreground via-foreground to-orange-400/90 bg-clip-text pb-[0.08em] text-transparent"
+              style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+            >
               Paighan
-            </TextAnimate>
+            </motion.span>
           </h1>
 
           <motion.p
