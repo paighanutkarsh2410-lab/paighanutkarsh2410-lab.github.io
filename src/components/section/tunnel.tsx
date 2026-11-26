@@ -26,14 +26,14 @@ type Panel = { side: -1 | 1; kind: "project" | "skills"; render: ReactNode };
 
 function ProjectPanel({ p, i }: { p: (typeof DATA.projects)[number]; i: number }) {
   return (
-    <a href={`#projects`} className="group block size-full overflow-hidden rounded-2xl border border-orange-500/30 bg-[#120c09] shadow-[0_0_60px_-10px_rgba(249,115,22,.45)]">
+    <a href={`#projects`} className="group block size-full overflow-hidden rounded-2xl border border-white/10 bg-[#120c09] shadow-[0_30px_80px_-30px_rgba(0,0,0,.9)]">
       <div className="relative h-[60%] overflow-hidden">
         <img src={p.image} alt="" className="size-full object-cover object-top transition-transform duration-700 group-hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#120c09] via-transparent" />
       </div>
       <div className="p-4 md:p-5">
-        <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-orange-400 md:text-[10px]">
-          {String(i + 1).padStart(2, "0")} · project
+        <div className="font-mono text-[11px] text-orange-400 tabular-nums md:text-xs">
+          {String(i + 1).padStart(2, "0")} · Project
         </div>
         <div className="mt-1 text-2xl font-semibold tracking-tight text-white md:text-4xl">{p.title}</div>
         <div className="mt-1 line-clamp-2 text-xs text-white/70 md:text-base">{p.dates}</div>
@@ -45,8 +45,8 @@ function ProjectPanel({ p, i }: { p: (typeof DATA.projects)[number]; i: number }
 
 function SkillsPanel() {
   return (
-    <div className="flex size-full flex-col justify-center rounded-2xl border border-orange-500/30 bg-[#0f0b09] p-5 shadow-[0_0_60px_-14px_rgba(249,115,22,.45)] md:p-8">
-      <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-orange-400 md:text-xs">tech stack</div>
+    <div className="flex size-full flex-col justify-center rounded-2xl border border-white/10 bg-[#0f0b09] p-5 shadow-[0_30px_80px_-30px_rgba(0,0,0,.9)] md:p-8">
+      <div className="font-mono text-[11px] text-orange-400 md:text-xs">Tech stack</div>
       <div className="mt-1 text-xl font-semibold tracking-tight text-white md:text-3xl">What I build with</div>
       <div className="mt-4 grid grid-cols-4 gap-1.5 md:grid-cols-5 md:gap-2.5">
         {DATA.skills.slice(0, 15).map((s, i) => (
@@ -266,7 +266,7 @@ export default function Tunnel() {
 
         {/* entry caption */}
         <motion.div style={{ opacity: introOpacity }} className="pointer-events-none absolute inset-x-0 top-[14%] px-6 text-center">
-          <div className="font-mono text-xs uppercase tracking-[0.25em] text-orange-400">The work, up close</div>
+          <div className="font-mono text-sm text-orange-400">The work, up close</div>
           <div className="mt-3 text-4xl font-semibold tracking-tighter text-white md:text-6xl">Four platforms. One way of building.</div>
         </motion.div>
 

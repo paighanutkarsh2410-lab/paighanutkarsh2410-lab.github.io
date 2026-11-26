@@ -41,7 +41,7 @@ export default function Skills() {
             {GROUPS.map(([k, v], i) => (
               <Reveal key={k} delay={i * 0.05} y={12}>
                 <div className="grid grid-cols-[120px_1fr] gap-4 py-3 text-sm md:grid-cols-[150px_1fr]">
-                  <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground/80 pt-0.5">{k}</span>
+                  <span className="font-mono text-xs text-muted-foreground pt-0.5">{k}</span>
                   <span>{v}</span>
                 </div>
               </Reveal>

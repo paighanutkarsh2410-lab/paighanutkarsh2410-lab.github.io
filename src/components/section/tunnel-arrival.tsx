@@ -94,9 +94,9 @@ export function TunnelArrival({ progress, mobile }: { progress: MotionValue<numb
               orbit.current[i] = el;
             }}
             href="#projects"
-            className="pointer-events-auto absolute left-0 top-0 flex items-center gap-2 whitespace-nowrap rounded-full border border-orange-500/40 bg-[#140c08]/90 px-3.5 py-1.5 text-xs font-medium text-white/90 opacity-0 shadow-[0_0_30px_-8px_rgba(249,115,22,.6)] backdrop-blur will-change-transform md:text-sm"
+            className="pointer-events-auto absolute left-0 top-0 flex items-center gap-2 whitespace-nowrap rounded-full border border-white/10 bg-[#140c08]/90 px-3.5 py-1.5 text-xs font-medium text-white/90 opacity-0 will-change-transform md:text-sm"
           >
-            <span className="size-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,.9)]" />
+            <span className="size-1.5 rounded-full bg-emerald-500" />
             {p.title}
           </a>
         ))}
@@ -106,9 +106,8 @@ export function TunnelArrival({ progress, mobile }: { progress: MotionValue<numb
       <div className="relative z-[4] flex flex-col items-center px-6 text-center">
         <motion.div
           style={{ rotateX: monoRotate, y: monoY, opacity: monoOpacity, transformPerspective: 900 }}
-          className="relative grid size-24 place-items-center rounded-[1.75rem] bg-gradient-to-br from-orange-500 via-orange-500 to-amber-400 text-4xl font-semibold tracking-tight text-white shadow-[0_0_120px_20px_rgba(249,115,22,.45)] md:size-32 md:text-5xl"
+          className="relative grid size-24 place-items-center rounded-[1.75rem] bg-gradient-to-br from-orange-500 via-orange-500 to-amber-400 text-4xl font-semibold tracking-tight text-white shadow-[0_40px_100px_-30px_rgba(249,115,22,.5)] md:size-32 md:text-5xl"
         >
-          <span className="absolute inset-0 rounded-[inherit] bg-[linear-gradient(115deg,transparent_30%,rgba(255,255,255,.45)_48%,transparent_62%)] bg-[length:250%_100%] animate-[arrival-sheen_3.5s_ease-in-out_infinite]" />
           <span className="relative">UP</span>
         </motion.div>
 
@@ -128,15 +127,12 @@ export function TunnelArrival({ progress, mobile }: { progress: MotionValue<numb
         </motion.div>
 
         <motion.div style={{ opacity: chips }} className="mt-4 flex items-center gap-2 font-mono text-[11px] text-white/60 md:text-xs">
-          <span className="relative flex size-2">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-70" />
-            <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
-          </span>
+          <span className="size-1.5 rounded-full bg-emerald-500" />
           4 services healthy · 5 SLOs green · open to SRE &amp; DevOps roles
         </motion.div>
 
         <motion.div style={{ opacity: ctas, y: ctasY }} className={`mt-8 flex flex-wrap justify-center gap-3 ${ctaOn ? "pointer-events-auto" : ""}`}>
-          <a href="#projects" className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-6 py-3 text-sm font-medium text-white shadow-lg shadow-orange-500/30 transition-colors hover:bg-orange-400">
+          <a href="#projects" className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-6 py-3 text-sm font-medium text-neutral-950 transition-colors hover:bg-orange-400 active:scale-[0.98]">
             Explore the work <ArrowDown className="size-4" />
           </a>
           <a href="#contact" className="inline-flex items-center rounded-full border border-white/20 bg-white/[0.04] px-6 py-3 text-sm font-medium text-white backdrop-blur transition-colors hover:border-orange-400/70">

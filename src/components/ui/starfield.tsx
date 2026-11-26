@@ -19,7 +19,7 @@ function dots(count: number, seed: number): Dot[] {
     x: rnd() * 100,
     y: rnd() * 100,
     size: 1 + rnd() * 1.6,
-    alpha: 0.25 + rnd() * 0.6,
+    alpha: 0.15 + rnd() * 0.4,
     dur: 14 + rnd() * 22,
     delay: -rnd() * 30,
     dx: (rnd() - 0.5) * 60,
@@ -38,7 +38,7 @@ export function Starfield({ color, className = "" }: { color: string; className?
   const my = useMotionValue(0);
   const sx = useSpring(mx, { stiffness: 40, damping: 18 });
   const sy = useSpring(my, { stiffness: 40, damping: 18 });
-  const lean = [6, 14, 26].map((k) => ({ x: useTransform(sx, (v) => v * k), y: useTransform(sy, (v) => v * k) })); // eslint-disable-line react-hooks/rules-of-hooks
+  const lean = [3, 6, 10].map((k) => ({ x: useTransform(sx, (v) => v * k), y: useTransform(sy, (v) => v * k) })); // eslint-disable-line react-hooks/rules-of-hooks
   useEffect(() => {
     if (reduce) return;
     const on = (e: PointerEvent) => {

@@ -7,7 +7,6 @@ import Markdown from "react-markdown";
 import { ArrowUpRight } from "lucide-react";
 import { DATA } from "@/data/resume";
 import { MagicCard } from "@/components/ui/magic-card";
-import { BorderBeam } from "@/components/ui/border-beam";
 import { Tilt } from "@/components/motion/tilt";
 import { Reveal, SectionHeading } from "@/components/motion/reveal";
 import { cn } from "@/lib/utils";
@@ -50,12 +49,12 @@ function Card({ p, featured, flip, index, compact, open, openIndex }: { p: Proje
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
             </motion.div>
-            <span className="absolute bottom-4 left-4 inline-flex translate-y-2 items-center gap-2 rounded-full bg-background/85 px-3.5 py-1.5 text-xs font-medium text-foreground opacity-0 shadow-lg transition-all duration-300 ease-[cubic-bezier(.16,1,.3,1)] group-hover/img:translate-y-0 group-hover/img:opacity-100 group-focus-visible/img:translate-y-0 group-focus-visible/img:opacity-100 [@media(hover:none)]:translate-y-0 [@media(hover:none)]:opacity-100">
+            <span className="absolute bottom-4 left-4 inline-flex translate-y-2 items-center gap-2 rounded-full bg-background/85 px-3.5 py-1.5 text-xs font-medium text-foreground opacity-0 shadow-lg transition-[transform,opacity] duration-300 ease-[cubic-bezier(.16,1,.3,1)] group-hover/img:translate-y-0 group-hover/img:opacity-100 group-focus-visible/img:translate-y-0 group-focus-visible/img:opacity-100 [@media(hover:none)]:translate-y-0 [@media(hover:none)]:opacity-100">
               Explore how it works <ArrowUpRight className="size-3.5" />
             </span>
           </button>
           <div className={cn("flex flex-1 flex-col p-6 md:p-8", featured && cn("lg:p-10", flip ? "lg:order-2" : "lg:order-1"))}>
-            <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-orange-500">
+            <div className="font-mono text-xs text-orange-500 tabular-nums">
               {String(index + 1).padStart(2, "0")} · {p.dates}
             </div>
             <motion.h3
@@ -101,7 +100,6 @@ function Card({ p, featured, flip, index, compact, open, openIndex }: { p: Proje
             </div>
           </div>
         </div>
-        {featured && <BorderBeam size={260} duration={9} colorFrom="#f97316" colorTo="#f43f5e" borderWidth={1.5} />}
       </MagicCard>
     </Tilt>
   );

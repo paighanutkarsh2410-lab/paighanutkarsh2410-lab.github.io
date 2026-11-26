@@ -93,7 +93,7 @@ export function ProjectView({ project: p, index, onClose }: { project: Project; 
               <div className="absolute inset-0 bg-gradient-to-t from-[#0d0907] via-transparent to-transparent" />
             </motion.div>
             <div className="flex flex-1 flex-col p-6 md:p-9">
-              <motion.div {...rise(0)} className="font-mono text-[11px] uppercase tracking-[0.2em] text-orange-500">
+              <motion.div {...rise(0)} className="font-mono text-xs text-orange-500 tabular-nums">
                 {String(index + 1).padStart(2, "0")} · {p.dates}
               </motion.div>
               <motion.h3
@@ -137,7 +137,7 @@ export function ProjectView({ project: p, index, onClose }: { project: Project; 
           {/* The system, assembling itself, with work flowing down through it. */}
           {flow && (
             <div className="relative border-t border-white/10 p-6 md:p-9 lg:border-l lg:border-t-0">
-              <motion.p {...rise(1)} className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/50">
+              <motion.p {...rise(1)} className="font-mono text-xs text-white/50">
                 How it works
               </motion.p>
               <motion.p {...rise(2)} className="mt-2 text-xl font-medium tracking-tight text-white">

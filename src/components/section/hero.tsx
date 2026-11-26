@@ -7,16 +7,13 @@ import dynamic from "next/dynamic";
 import { ArrowDown, ArrowRight } from "lucide-react";
 import { Starfield } from "@/components/ui/starfield";
 import { TextAnimate } from "@/components/ui/text-animate";
-import { AuroraText } from "@/components/ui/aurora-text";
-import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
-import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { Magnetic } from "@/components/motion/magnetic";
 import { DATA } from "@/data/resume";
 
 // three.js globe, loaded after first paint so the hero text never waits on it
 const TrafficGlobe = dynamic(() => import("@/components/traffic-globe"), {
   ssr: false,
-  loading: () => <div className="aspect-square w-full animate-pulse rounded-full bg-orange-500/5" />,
+  loading: () => <div className="aspect-square w-full rounded-full bg-orange-500/5" />,
 });
 
 export default function Hero() {
@@ -33,7 +30,6 @@ export default function Hero() {
   return (
     <section ref={ref} id="hero" className="relative isolate min-h-[100svh] overflow-hidden">
       <Starfield className="absolute inset-0 -z-10" color={dark ? "#ffb37a" : "#7c2d12"} />
-      <div className="pointer-events-none absolute -z-10 left-1/2 top-[-30%] h-[100vh] w-[120vw] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(249,115,22,.2)_0%,rgba(249,115,22,.07)_40%,transparent_70%)]" />
 
       <div className="mx-auto grid min-h-[100svh] max-w-6xl grid-cols-1 items-center gap-6 px-6 pt-24 pb-28 lg:grid-cols-[1.15fr_1fr]">
         <motion.div style={reduce ? undefined : { y: textY, opacity: textOpacity }} className="relative z-10">
@@ -41,13 +37,10 @@ export default function Hero() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
-            className="mb-7 inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/60 px-4 py-1.5 text-sm backdrop-blur"
+            className="mb-7 flex items-center gap-2 font-mono text-xs text-muted-foreground md:text-sm"
           >
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
-              <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
-            </span>
-            <AnimatedShinyText className="mx-0 max-w-none">Open to SRE &amp; DevOps roles · {DATA.location}</AnimatedShinyText>
+            <span className="size-1.5 rounded-full bg-emerald-500" />
+            Open to SRE &amp; DevOps roles · {DATA.location}
           </motion.div>
 
           <h1 className="text-[clamp(3.4rem,10vw,7rem)] font-semibold leading-[0.9] tracking-tighter">
@@ -55,15 +48,12 @@ export default function Hero() {
             <TextAnimate as="span" by="character" animation="blurInUp" duration={0.8} once accessible={false} className="block whitespace-nowrap">
               Utkarsh
             </TextAnimate>
-            {/* Safari won't paint background-clip:text through per-letter animated children,
-                so the gradient word animates as one piece */}
             <motion.span
               aria-hidden
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
-              className="block whitespace-nowrap bg-gradient-to-r from-foreground via-foreground to-orange-400/90 bg-clip-text pb-[0.08em] text-transparent"
-              style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+              className="block whitespace-nowrap pb-[0.08em]"
             >
               Paighan
             </motion.span>
@@ -76,9 +66,7 @@ export default function Hero() {
             className="mt-7 max-w-xl text-lg text-muted-foreground md:text-2xl md:leading-snug text-pretty"
           >
             Site Reliability &amp; DevOps Engineer. I build platforms that{" "}
-            <AuroraText colors={["#ff5a1f", "#ffb35c", "#f43f5e", "#f97316"]} className="font-semibold">
-              ship safely and stay up.
-            </AuroraText>
+            <span className="font-medium text-orange-500">ship safely and stay up.</span>
           </motion.p>
 
           <motion.div
@@ -88,16 +76,14 @@ export default function Hero() {
             className="mt-10 flex flex-wrap items-center gap-4"
           >
             <Magnetic>
-            <a href="#projects">
-              <ShimmerButton background="linear-gradient(135deg,#ea580c,#c2410c)" shimmerColor="#ffe4c4" className="px-7 py-3.5 text-sm font-medium shadow-2xl shadow-orange-500/30">
-                See what I&apos;ve built <ArrowRight className="ml-2 size-4" />
-              </ShimmerButton>
+            <a href="#projects" className="inline-flex items-center rounded-full bg-orange-500 px-7 py-3.5 text-sm font-medium text-neutral-950 transition-colors hover:bg-orange-400 active:scale-[0.98]">
+              See what I&apos;ve built <ArrowRight className="ml-2 size-4" />
             </a>
             </Magnetic>
-            <Magnetic strength={0.24}>
+            <Magnetic strength={0.12}>
             <a
               href="#contact"
-              className="inline-flex items-center rounded-full border border-border/80 bg-background/40 px-7 py-3.5 text-sm font-medium backdrop-blur transition-colors hover:bg-muted"
+              className="inline-flex items-center rounded-full border border-border px-7 py-3.5 text-sm font-medium transition-colors hover:bg-muted active:scale-[0.98]"
             >
               Get in touch
             </a>
@@ -120,8 +106,8 @@ export default function Hero() {
         href="#tunnel"
         aria-label="Scroll down"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1, y: [0, 8, 0] }}
-        transition={{ opacity: { delay: 1.6 }, y: { repeat: Infinity, duration: 2, ease: "easeInOut" } }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.6 }}
         className="absolute bottom-24 left-1/2 hidden -translate-x-1/2 rounded-full border border-border/70 p-2 text-muted-foreground md:block"
       >
         <ArrowDown className="size-4" />

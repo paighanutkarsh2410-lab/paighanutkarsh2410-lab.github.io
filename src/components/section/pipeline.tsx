@@ -19,7 +19,7 @@ const Node = forwardRef<HTMLDivElement, { children: ReactNode; label: string; bi
       <div
         ref={ref}
         className={cn(
-          "grid place-items-center rounded-2xl border border-border bg-background shadow-[0_0_24px_-8px_rgba(249,115,22,.35)]",
+          "grid place-items-center rounded-2xl border border-border bg-background",
           big ? "size-20 md:size-24" : "size-12 md:size-16"
         )}
       >

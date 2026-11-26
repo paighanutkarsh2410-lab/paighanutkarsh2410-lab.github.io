@@ -46,7 +46,7 @@ export function SectionHeading({
     <div className="mb-12 md:mb-16 max-w-3xl">
       {eyebrow && (
         <motion.div
-          className="mb-4 inline-flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-orange-500"
+          className="mb-4 inline-flex items-center gap-3 font-mono text-sm text-orange-500"
           initial={reduce ? false : { opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={view}
