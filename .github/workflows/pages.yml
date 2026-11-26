@@ -1,5 +1,6 @@
 name: Deploy to GitHub Pages
 
+# A static site: no build. The page, its assets and the résumé are published as they are.
 on:
   push:
     branches: [main]
@@ -19,17 +20,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npx next build --webpack
-      - run: touch out/.nojekyll
+      - name: Collect the site
+        run: |
+          mkdir _site
+          cp -r index.html assets Utkarsh-Paighan-Resume.pdf _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: out
+          path: _site
 
   deploy:
     needs: build
