@@ -5,11 +5,12 @@ import { motion, useReducedMotion, useScroll, useTransform } from "motion/react"
 import { useTheme } from "next-themes";
 import dynamic from "next/dynamic";
 import { ArrowDown, ArrowRight } from "lucide-react";
-import { Particles } from "@/components/ui/particles";
+import { Starfield } from "@/components/ui/starfield";
 import { TextAnimate } from "@/components/ui/text-animate";
 import { AuroraText } from "@/components/ui/aurora-text";
 import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
+import { Magnetic } from "@/components/motion/magnetic";
 import { DATA } from "@/data/resume";
 
 // three.js globe, loaded after first paint so the hero text never waits on it
@@ -31,15 +32,7 @@ export default function Hero() {
 
   return (
     <section ref={ref} id="hero" className="relative isolate min-h-[100svh] overflow-hidden">
-      <Particles
-        className="absolute inset-0 -z-10"
-        quantity={typeof window !== "undefined" && window.innerWidth < 768 ? 45 : 140}
-        ease={70}
-        staticity={40}
-        size={0.5}
-        color={dark ? "#ffb37a" : "#7c2d12"}
-        refresh
-      />
+      <Starfield className="absolute inset-0 -z-10" color={dark ? "#ffb37a" : "#7c2d12"} />
       <div className="pointer-events-none absolute -z-10 left-1/2 top-[-30%] h-[100vh] w-[120vw] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(249,115,22,.2)_0%,rgba(249,115,22,.07)_40%,transparent_70%)]" />
 
       <div className="mx-auto grid min-h-[100svh] max-w-6xl grid-cols-1 items-center gap-6 px-6 pt-24 pb-28 lg:grid-cols-[1.15fr_1fr]">
@@ -94,17 +87,21 @@ export default function Hero() {
             transition={{ duration: 0.9, delay: 1 }}
             className="mt-10 flex flex-wrap items-center gap-4"
           >
+            <Magnetic>
             <a href="#projects">
               <ShimmerButton background="linear-gradient(135deg,#ea580c,#c2410c)" shimmerColor="#ffe4c4" className="px-7 py-3.5 text-sm font-medium shadow-2xl shadow-orange-500/30">
                 See what I&apos;ve built <ArrowRight className="ml-2 size-4" />
               </ShimmerButton>
             </a>
+            </Magnetic>
+            <Magnetic strength={0.24}>
             <a
               href="#contact"
               className="inline-flex items-center rounded-full border border-border/80 bg-background/40 px-7 py-3.5 text-sm font-medium backdrop-blur transition-colors hover:bg-muted"
             >
               Get in touch
             </a>
+            </Magnetic>
           </motion.div>
         </motion.div>
 

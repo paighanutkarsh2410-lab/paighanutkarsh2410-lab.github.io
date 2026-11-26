@@ -2,6 +2,7 @@
 
 import { Meteors } from "@/components/ui/meteors";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
+import { Magnetic } from "@/components/motion/magnetic";
 import { TextAnimate } from "@/components/ui/text-animate";
 import { Reveal } from "@/components/motion/reveal";
 import { FileDown, Phone } from "lucide-react";
@@ -24,12 +25,14 @@ export default function ContactSection() {
               I&apos;m open to Site Reliability and DevOps roles. Email or call, and I&apos;ll get back to you within a day.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+              <Magnetic>
               <a href={email.url}>
                 <ShimmerButton background="linear-gradient(135deg,#ea580c,#c2410c)" shimmerColor="#ffe4c4" className="px-7 py-3.5 text-sm font-medium shadow-2xl shadow-orange-500/30">
                   <email.icon className="mr-2 size-4" />
                   {DATA.contact.email}
                 </ShimmerButton>
               </a>
+              </Magnetic>
               <a
                 href={DATA.resumeUrl}
                 download="Utkarsh-Paighan-Resume.pdf"

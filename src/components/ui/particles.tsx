@@ -103,10 +103,15 @@ export const Particles: React.FC<ParticlesProps> = ({
   const initCanvasRef = useRef<() => void>(() => {})
   const onMouseMoveRef = useRef<() => void>(() => {})
   const animateRef = useRef<() => void>(() => {})
+  // Drawn only while on screen: a 2D canvas redrawn every frame off screen still queues work on
+  // the GPU, and stalls the page while the GPU is busy elsewhere (the tunnel's big surfaces).
+  const onScreen = useRef(true)
 
   useEffect(() => {
     if (canvasRef.current) {
-      context.current = canvasRef.current.getContext("2d")
+      // A CPU-backed canvas: a few hundred dots are cheap to draw on the CPU, and a GPU-backed
+      // canvas makes the page wait whenever the GPU is busy (e.g. preparing the tunnel below).
+      context.current = canvasRef.current.getContext("2d", { willReadFrequently: true })
     }
     initCanvasRef.current()
     animateRef.current()
@@ -122,7 +127,15 @@ export const Particles: React.FC<ParticlesProps> = ({
 
     window.addEventListener("resize", handleResize)
 
+    const io = new IntersectionObserver(([e]) => {
+      const was = onScreen.current
+      onScreen.current = e.isIntersecting
+      if (e.isIntersecting && !was) animateRef.current()
+    })
+    if (canvasContainerRef.current) io.observe(canvasContainerRef.current)
+
     return () => {
+      io.disconnect()
       if (rafID.current != null) {
         window.cancelAnimationFrame(rafID.current)
       }
@@ -302,7 +315,7 @@ export const Particles: React.FC<ParticlesProps> = ({
         drawCircle(newCircle)
       }
     })
-    rafID.current = window.requestAnimationFrame(animateRef.current)
+    rafID.current = onScreen.current ? window.requestAnimationFrame(animateRef.current) : null
   }
 
   // Layout effects run before the passive effects above that call these.

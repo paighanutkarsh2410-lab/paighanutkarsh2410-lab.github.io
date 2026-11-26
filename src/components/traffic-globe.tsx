@@ -27,7 +27,7 @@ const CITIES: [string, number, number][] = [
   ["Seoul", 37.57, 126.98], ["Sydney", -33.87, 151.21], ["Jakarta", -6.2, 106.85],
 ];
 
-type Arc = { id: number; startLat: number; startLng: number; endLat: number; endLng: number; colors: [string, string]; stroke: number };
+type Arc = { id: number; startLat: number; startLng: number; endLat: number; endLng: number; colors: [string, string]; stroke: number; gap: number };
 type Ring = { id: number; lat: number; lng: number; color: string; max: number; speed: number; period: number };
 type Label = { id: number; lat: number; lng: number; text: string; color: string };
 
@@ -42,6 +42,24 @@ function rttMs(aLat: number, aLng: number, bLat: number, bLng: number) {
 
 let uid = 0;
 
+// Accessors the globe reads per item. They must keep one identity across renders: a new function
+// on every render tells the globe the layer changed, and it rebuilds every arc and ring.
+const ringColorOf = (r: object) => {
+  const c = (r as Ring).color;
+  return (t: number) => `${c}${Math.round((1 - t) * 255).toString(16).padStart(2, "0")}`;
+};
+
+/** The request rate in the corner: ticks on its own, so the globe doesn't re-render with it. */
+function RequestRate({ live }: { live: boolean }) {
+  const [rps, setRps] = useState(1182);
+  useEffect(() => {
+    if (!live) return;
+    const t = setInterval(() => setRps((r) => Math.max(900, Math.min(1500, r + Math.round((Math.random() - 0.5) * 60)))), 560);
+    return () => clearInterval(t);
+  }, [live]);
+  return <span className="tabular-nums text-foreground">{rps.toLocaleString("en-US")}</span>;
+}
+
 export default function TrafficGlobe({ dark }: { dark: boolean }) {
   const wrap = useRef<HTMLDivElement>(null);
   const globe = useRef<GlobeMethods | undefined>(undefined);
@@ -49,7 +67,6 @@ export default function TrafficGlobe({ dark }: { dark: boolean }) {
   const [arcs, setArcs] = useState<Arc[]>([]);
   const [labels, setLabels] = useState<Label[]>([]);
   const [failed, setFailed] = useState(false);
-  const [rps, setRps] = useState(1182);
   const [visible, setVisible] = useState(true);
   const reduce = useMemo(() => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches, []);
   // phones: lower render resolution, no MSAA, coarser hex grid. A 3x WebGL canvas with anti-aliasing
@@ -114,10 +131,10 @@ export default function TrafficGlobe({ dark }: { dark: boolean }) {
         id: ++uid, startLat: lat, startLng: lng, endLat: target.lat, endLng: target.lng,
         colors: failed ? ["rgba(251,191,36,0.15)", "#fbbf24"] : ["rgba(249,115,22,0.12)", "#ff7a2f"],
         stroke: 0.45,
+        gap: Math.random(),
       };
-      setArcs((a) => [...a.slice(-34), arc]);
-      setRps((r) => Math.max(900, Math.min(1500, r + Math.round((Math.random() - 0.5) * 60))));
-    }, 280);
+      setArcs((a) => [...a.slice(-15), arc]);
+    }, 420);
     return () => clearInterval(t);
   }, [visible, reduce, failed, target.lat, target.lng]);
 
@@ -149,7 +166,7 @@ export default function TrafficGlobe({ dark }: { dark: boolean }) {
     ({ lat, lng }: { lat: number; lng: number }) => {
       const ms = rttMs(lat, lng, target.lat, target.lng);
       const id = ++uid;
-      setArcs((a) => [...a.slice(-22), { id, startLat: lat, startLng: lng, endLat: target.lat, endLng: target.lng, colors: ["#ffffff", "#ff7a2f"], stroke: 0.9 }]);
+      setArcs((a) => [...a.slice(-22), { id, startLat: lat, startLng: lng, endLat: target.lat, endLng: target.lng, colors: ["#ffffff", "#ff7a2f"], stroke: 0.9, gap: 0 }]);
       setLabels((l) => [...l.slice(-3), { id, lat, lng, text: `${ms} ms`, color: "#ffffff" }]);
       setTimeout(() => setLabels((l) => l.filter((x) => x.id !== id)), 3600);
     },
@@ -197,17 +214,16 @@ export default function TrafficGlobe({ dark }: { dark: boolean }) {
         arcStroke="stroke"
         arcDashLength={0.38}
         arcDashGap={2}
-        arcDashInitialGap={() => Math.random()}
+        arcDashInitialGap="gap"
         arcDashAnimateTime={1500}
         arcAltitudeAutoScale={0.42}
-        arcsTransitionDuration={600}
+        arcsTransitionDuration={0}
+        arcCurveResolution={32}
+        arcCircularResolution={4}
         ringsData={rings}
         ringLat="lat"
         ringLng="lng"
-        ringColor={(r: object) => {
-          const c = (r as Ring).color;
-          return (t: number) => `${c}${Math.round((1 - t) * 255).toString(16).padStart(2, "0")}`;
-        }}
+        ringColor={ringColorOf}
         ringMaxRadius="max"
         ringPropagationSpeed="speed"
         ringRepeatPeriod="period"
@@ -240,7 +256,7 @@ export default function TrafficGlobe({ dark }: { dark: boolean }) {
           serving from <span className="text-orange-400">{target.id}</span> · {target.name}
         </div>
         <div>
-          <span className="tabular-nums text-foreground">{rps.toLocaleString("en-US")}</span> req/s · p99{" "}
+          <RequestRate live={visible && !reduce} /> req/s · p99{" "}
           <span className="tabular-nums text-foreground">{failed ? 268 : 205} ms</span>
         </div>
       </div>

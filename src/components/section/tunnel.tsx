@@ -5,7 +5,6 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   motion,
   useMotionValue,
-  useReducedMotion,
   useScroll,
   useSpring,
   useTransform,
@@ -109,7 +108,6 @@ function PanelInWorld({
 }
 
 export default function Tunnel() {
-  const reduce = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
   const [vw, setVw] = useState(1440);
   const [vh, setVh] = useState(900);
@@ -141,7 +139,8 @@ export default function Tunnel() {
   const camRaw = useTransform(scrollYProgress, [0, 1], [0, END]);
   const cam = useSpring(camRaw, { stiffness: 140, damping: 30, mass: 0.4 });
   const worldZ = useTransform(cam, (c) => `translateZ(${c}px)`);
-  const gridShift = useTransform(cam, (c) => `${-(c % 200)}px`);
+  // The grid streams past by sliding a pattern one cell long, which the GPU does for free.
+  const gridShift = useTransform(cam, (c) => -(c % 200));
 
   // pointer sway — the camera leans toward the cursor
   const mx = useMotionValue(0);
@@ -154,16 +153,16 @@ export default function Tunnel() {
   const introOpacity = useTransform(scrollYProgress, (v) => Math.max(0, 1 - v / 0.06));
   const progressW = useTransform(scrollYProgress, (v) => `${v * 100}%`);
 
-  if (reduce) return null;
-
-  const wallStyle = (bgPos: MotionValue<string>) => ({
+  const wallMask = {
+    WebkitMaskImage: "linear-gradient(90deg, #000 0%, rgba(0,0,0,.6) 35%, transparent 75%)",
+    maskImage: "linear-gradient(90deg, #000 0%, rgba(0,0,0,.6) 35%, transparent 75%)",
+    overflow: "hidden" as const,
+  };
+  const wallGrid = {
     backgroundImage:
       "linear-gradient(90deg, rgba(249,115,22,.55) 1px, transparent 1px), linear-gradient(0deg, rgba(249,115,22,.18) 1px, transparent 1px)",
     backgroundSize: "200px 100%, 100% 120px",
-    backgroundPositionX: bgPos,
-    WebkitMaskImage: "linear-gradient(90deg, #000 0%, rgba(0,0,0,.6) 35%, transparent 75%)",
-    maskImage: "linear-gradient(90deg, #000 0%, rgba(0,0,0,.6) 35%, transparent 75%)",
-  });
+  };
   const DEPTH = 3600;
 
   return (
@@ -172,7 +171,7 @@ export default function Tunnel() {
       id="tunnel"
       aria-label="Walk-through of projects, numbers and experience"
       style={{ height: `${Math.round(lite ? panels.length * 55 + 110 : panels.length * 90 + 170)}vh` }}
-      className="relative"
+      className="relative motion-reduce:hidden"
     >
       <div
         className="sticky top-0 h-svh overflow-hidden bg-[radial-gradient(ellipse_at_center,#1d0f08_0%,#0b0706_55%,#050304_100%)]"
@@ -205,29 +204,40 @@ export default function Tunnel() {
           {!lite && (
             <>
           {/* corridor surfaces — they slide with the camera so the grid streams past */}
-          <motion.div
+          <div
             className="absolute top-0 h-full"
-            style={{ left: `calc(50% - ${half}px)`, width: DEPTH, transformOrigin: "left center", transform: "rotateY(90deg)", ...wallStyle(gridShift) }}
-          />
-          <motion.div
+            style={{ left: `calc(50% - ${half}px)`, width: DEPTH, transformOrigin: "left center", transform: "rotateY(90deg)", ...wallMask }}
+          >
+            <motion.div className="h-full will-change-transform" style={{ width: DEPTH + 200, x: gridShift, ...wallGrid }} />
+          </div>
+          <div
             className="absolute top-0 h-full"
-            style={{ left: `calc(50% + ${half}px - ${DEPTH}px)`, width: DEPTH, transformOrigin: "right center", transform: "rotateY(-90deg) scaleX(-1)", ...wallStyle(gridShift) }}
-          />
-          <motion.div
-            className="absolute left-1/2 top-full -translate-x-1/2"
+            style={{ left: `calc(50% + ${half}px - ${DEPTH}px)`, width: DEPTH, transformOrigin: "right center", transform: "rotateY(-90deg) scaleX(-1)", ...wallMask }}
+          >
+            <motion.div className="h-full will-change-transform" style={{ width: DEPTH + 200, x: gridShift, ...wallGrid }} />
+          </div>
+          <div
+            className="absolute left-1/2 top-full -translate-x-1/2 overflow-hidden"
             style={{
               width: half * 2,
               height: DEPTH,
               transformOrigin: "top center",
               transform: "rotateX(-90deg)",
-              backgroundImage:
-                "linear-gradient(0deg, rgba(249,115,22,.6) 1px, transparent 1px), linear-gradient(90deg, rgba(249,115,22,.22) 1px, transparent 1px)",
-              backgroundSize: "100% 200px, 160px 100%",
-              backgroundPositionY: gridShift,
               WebkitMaskImage: "linear-gradient(180deg, #000, transparent 75%)",
               maskImage: "linear-gradient(180deg, #000, transparent 75%)",
             }}
-          />
+          >
+            <motion.div
+              className="w-full will-change-transform"
+              style={{
+                height: DEPTH + 200,
+                y: gridShift,
+                backgroundImage:
+                  "linear-gradient(0deg, rgba(249,115,22,.6) 1px, transparent 1px), linear-gradient(90deg, rgba(249,115,22,.22) 1px, transparent 1px)",
+                backgroundSize: "100% 200px, 160px 100%",
+              }}
+            />
+          </div>
           <motion.div
             className="absolute bottom-full left-1/2 -translate-x-1/2"
             style={{

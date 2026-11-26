@@ -39,16 +39,52 @@ export function SectionHeading({
   title: ReactNode;
   sub?: ReactNode;
 }) {
+  const reduce = useReducedMotion();
+  const EASE = [0.16, 1, 0.3, 1] as const;
+  const view = { once: true, margin: "0px 0px -12% 0px" };
   return (
-    <Reveal className="mb-12 md:mb-16 max-w-3xl">
+    <div className="mb-12 md:mb-16 max-w-3xl">
       {eyebrow && (
-        <div className="mb-4 inline-flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-orange-500">
-          <span className="h-px w-8 bg-orange-500/60" />
+        <motion.div
+          className="mb-4 inline-flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-orange-500"
+          initial={reduce ? false : { opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={view}
+          transition={{ duration: 0.6, ease: EASE }}
+        >
+          <motion.span
+            className="h-px w-8 origin-left bg-orange-500/60"
+            initial={reduce ? false : { scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={view}
+            transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
+          />
           {eyebrow}
-        </div>
+        </motion.div>
       )}
-      <h2 className="text-4xl font-semibold tracking-tighter text-balance sm:text-5xl md:text-6xl">{title}</h2>
-      {sub && <p className="mt-5 max-w-2xl text-base text-muted-foreground md:text-lg text-pretty">{sub}</p>}
-    </Reveal>
+      {/* the title rises out of a slot: clipped below, it travels up into view */}
+      <div className="overflow-hidden pb-[0.12em]">
+        <motion.h2
+          className="text-4xl font-semibold tracking-tighter text-balance sm:text-5xl md:text-6xl"
+          initial={reduce ? false : { y: "105%", rotate: 1.5 }}
+          whileInView={{ y: 0, rotate: 0 }}
+          viewport={view}
+          transition={{ duration: 1, delay: 0.08, ease: EASE }}
+        >
+          {title}
+        </motion.h2>
+      </div>
+      {sub && (
+        <motion.p
+          className="mt-5 max-w-2xl text-base text-muted-foreground md:text-lg text-pretty"
+          initial={reduce ? false : { opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={view}
+          transition={{ duration: 0.9, delay: 0.3, ease: EASE }}
+        >
+          {sub}
+        </motion.p>
+      )}
+    </div>
   );
 }

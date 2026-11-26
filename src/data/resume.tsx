@@ -144,7 +144,7 @@ export const DATA = {
       dates: "Real-time F1 telemetry platform on Kubernetes",
       active: true,
       description:
-        "Streams real Formula 1 telemetry through Kafka into 7 FastAPI microservices, TimescaleDB and a live React dashboard; 90 races replayable. Every release is an Argo Rollouts canary with automated rollback. **5 SLOs** with burn-rate alerts; Chaos Mesh GameDays and k6 load tests served **1,182 / 1,182 viewers at 205 ms p99**.",
+        "Streams real Formula 1 telemetry through Kafka into 7 Python microservices and TimescaleDB, with a FastAPI and WebSocket API feeding a live React dashboard; **91 real races** replay, and each new Grand Prix is added on its own. Ingest, timing, strategy and the API ship as Argo Rollouts canaries with automated rollback. **5 SLOs** with burn-rate alerts; Chaos Mesh GameDays, and a local k6 test held **1,182 of 1,182 browser connections**.",
       technologies: ["Kafka", "Kubernetes", "Argo CD", "Argo Rollouts", "KEDA", "Prometheus", "Grafana", "OpenTelemetry", "Chaos Mesh", "k6"],
       links: [
         { type: "Live", href: "https://paighanutkarsh2410-lab.github.io/pitwall/", icon: <Icons.globe className="size-3" /> },

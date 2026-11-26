@@ -48,6 +48,16 @@ export function IconCloud({
   const rotationRef = useRef({ x: 0, y: 0 })
   const iconCanvasesRef = useRef<HTMLCanvasElement[]>([])
   const imagesLoadedRef = useRef<boolean[]>([])
+  // Spins only while on screen. It used to spin from page load forever, redrawing an unseen
+  // canvas every frame, which made the whole page wait whenever the GPU was busy.
+  const [onScreen, setOnScreen] = useState(false)
+  useEffect(() => {
+    const el = canvasRef.current
+    if (!el) return
+    const io = new IntersectionObserver(([e]) => setOnScreen(e.isIntersecting))
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
 
   // Pause animation if user prefers reduced motion
   useEffect(() => {
@@ -321,7 +331,7 @@ export function IconCloud({
           Boolean(icons || images) &&
           !imagesLoadedRef.current.every((loaded) => loaded)
         const shouldContinue =
-          !isPaused || isDragging || targetRotation !== null || hasPendingAssets
+          onScreen && (!isPaused || isDragging || targetRotation !== null || hasPendingAssets)
 
         if (shouldContinue) {
           animationFrameRef.current = requestAnimationFrame(animate)
@@ -344,6 +354,7 @@ export function IconCloud({
     isPaused,
     mousePos,
     targetRotation,
+    onScreen,
   ])
 
   return (

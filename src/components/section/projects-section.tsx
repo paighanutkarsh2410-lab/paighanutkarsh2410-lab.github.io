@@ -1,7 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/react";
 import Markdown from "react-markdown";
 import { ArrowUpRight } from "lucide-react";
 import { DATA } from "@/data/resume";
@@ -10,10 +11,18 @@ import { BorderBeam } from "@/components/ui/border-beam";
 import { Tilt } from "@/components/motion/tilt";
 import { Reveal, SectionHeading } from "@/components/motion/reveal";
 import { cn } from "@/lib/utils";
+import { ProjectView, sharedId } from "@/components/project-view";
 
 type Project = (typeof DATA.projects)[number];
 
-function Card({ p, featured, flip, index, compact }: { p: Project; featured?: boolean; flip?: boolean; index: number; compact?: boolean }) {
+type Open = { open: (i: number) => void; openIndex: number | null };
+
+function Card({ p, featured, flip, index, compact, open, openIndex }: { p: Project; featured?: boolean; flip?: boolean; index: number; compact?: boolean } & Open) {
+  const reduce = useReducedMotion();
+  // While this project is open, its screenshot and title are in the view; the card keeps their
+  // space so nothing around it moves.
+  const away = openIndex === index;
+  const shared = (part: "img" | "title") => (reduce || away ? undefined : sharedId(p, part));
   return (
     <Tilt className="h-full" max={featured ? 4 : 7}>
       <MagicCard
@@ -24,12 +33,13 @@ function Card({ p, featured, flip, index, compact }: { p: Project; featured?: bo
         gradientColor="rgba(249,115,22,0.09)"
       >
         <div className={cn("relative z-40 flex h-full flex-col", featured && (flip ? "lg:grid lg:grid-cols-[1.25fr_1fr]" : "lg:grid lg:grid-cols-[1fr_1.25fr]"))}>
-          <a
-            href={p.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn("group/img relative block overflow-hidden", featured ? cn("aspect-[16/10] lg:aspect-auto lg:h-full", flip ? "lg:order-1" : "lg:order-2") : "aspect-[16/9]")}
+          <button
+            type="button"
+            onClick={() => open(index)}
+            aria-label={`Explore ${p.title}: how it works`}
+            className={cn("group/img relative block w-full overflow-hidden text-left", featured ? cn("aspect-[16/10] lg:aspect-auto lg:h-full", flip ? "lg:order-1" : "lg:order-2") : "aspect-[16/9]")}
           >
+            <motion.div layoutId={shared("img")} transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }} className={cn("absolute inset-0 overflow-hidden", away && "invisible")}>
             <img
               src={p.image}
               alt={`${p.title} screenshot`}
@@ -39,15 +49,24 @@ function Card({ p, featured, flip, index, compact }: { p: Project; featured?: bo
               )}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
-            <span className="absolute right-4 top-4 grid size-9 place-items-center rounded-full bg-background/80 text-foreground opacity-0 backdrop-blur transition-opacity duration-300 group-hover/img:opacity-100">
-              <ArrowUpRight className="size-4" />
+            </motion.div>
+            <span className="absolute bottom-4 left-4 inline-flex translate-y-2 items-center gap-2 rounded-full bg-background/85 px-3.5 py-1.5 text-xs font-medium text-foreground opacity-0 shadow-lg transition-all duration-300 ease-[cubic-bezier(.16,1,.3,1)] group-hover/img:translate-y-0 group-hover/img:opacity-100 group-focus-visible/img:translate-y-0 group-focus-visible/img:opacity-100 [@media(hover:none)]:translate-y-0 [@media(hover:none)]:opacity-100">
+              Explore how it works <ArrowUpRight className="size-3.5" />
             </span>
-          </a>
+          </button>
           <div className={cn("flex flex-1 flex-col p-6 md:p-8", featured && cn("lg:p-10", flip ? "lg:order-2" : "lg:order-1"))}>
             <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-orange-500">
               {String(index + 1).padStart(2, "0")} · {p.dates}
             </div>
-            <h3 className={cn("mt-3 font-semibold tracking-tighter", featured ? "text-4xl md:text-5xl" : "text-3xl")}>{p.title}</h3>
+            <motion.h3
+              layoutId={shared("title")}
+              transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+              className={cn("mt-3 w-fit font-semibold tracking-tighter", featured ? "text-4xl md:text-5xl" : "text-3xl", away && "invisible")}
+            >
+              <button type="button" onClick={() => open(index)} className="text-left transition-colors hover:text-orange-500">
+                {p.title}
+              </button>
+            </motion.h3>
             <div className={cn("prose prose-sm mt-4 max-w-none text-pretty text-muted-foreground dark:prose-invert prose-strong:text-foreground", compact && "line-clamp-5")}>
               <Markdown>{p.description}</Markdown>
             </div>
@@ -93,7 +112,7 @@ function Card({ p, featured, flip, index, compact }: { p: Project; featured?: bo
  * scroll position wraps by one set width). Touching pauses it so the reader can swipe or read;
  * it resumes on its own shortly after.
  */
-function MobileCarousel() {
+function MobileCarousel({ open, openIndex }: Open) {
   const track = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   const n = DATA.projects.length;
@@ -181,7 +200,7 @@ function MobileCarousel() {
             aria-label={`${(i % n) + 1} of ${n}: ${p.title}`}
             aria-hidden={i >= n ? true : undefined}
           >
-            <Card p={p} index={i % n} compact />
+            <Card p={p} index={i % n} compact open={open} openIndex={i < n ? openIndex : null} />
           </div>
         ))}
       </div>
@@ -203,7 +222,23 @@ function MobileCarousel() {
 
 export default function ProjectsSection() {
   const [first, ...rest] = DATA.projects;
+  // The open project. Opening adds a history entry, so Back closes it as well as Esc does.
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const open = useCallback((i: number) => {
+    setOpenIndex(i);
+    history.pushState({ project: i }, "");
+  }, []);
+  const close = useCallback(() => {
+    if ((history.state as { project?: number } | null)?.project != null) history.back();
+    else setOpenIndex(null);
+  }, []);
+  useEffect(() => {
+    const onPop = () => setOpenIndex(null);
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
   return (
+    <LayoutGroup>
     <section id="projects" className="relative mx-auto max-w-6xl scroll-mt-10 px-6 py-16 md:py-32">
       <SectionHeading
         eyebrow="Selected work"
@@ -215,20 +250,24 @@ export default function ProjectsSection() {
         sub="Each one ships through GitOps, is watched by real SLOs, and has been broken on purpose to prove it recovers."
       />
       <Reveal className="md:hidden">
-        <MobileCarousel />
+        <MobileCarousel open={open} openIndex={openIndex} />
       </Reveal>
       <div className="hidden gap-5 md:grid md:gap-6">
         <Reveal>
-          <Card p={first} featured index={0} />
+          <Card p={first} featured index={0} open={open} openIndex={openIndex} />
         </Reveal>
         <div className="grid gap-5 md:grid-cols-3 md:gap-6">
           {rest.map((p, i) => (
             <Reveal key={p.title} delay={i * 0.1} className="h-full">
-              <Card p={p} index={i + 1} />
+              <Card p={p} index={i + 1} open={open} openIndex={openIndex} />
             </Reveal>
           ))}
         </div>
       </div>
+      <AnimatePresence>
+        {openIndex != null && <ProjectView key={openIndex} project={DATA.projects[openIndex]} index={openIndex} onClose={close} />}
+      </AnimatePresence>
     </section>
+    </LayoutGroup>
   );
 }

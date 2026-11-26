@@ -340,3 +340,17 @@
   100% { transform: scale(1.15); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .tunnel-rings rect { animation: none; opacity: .3; transform: scale(.5); } }
+
+/* The hero's drifting dots (components/ui/starfield.tsx): each wanders and back on its own loop. */
+.starfield-dot { animation-name: starfield-drift; animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-direction: alternate; will-change: transform; }
+@keyframes starfield-drift { to { transform: translate3d(var(--dx), var(--dy), 0); } }
+@media (prefers-reduced-motion: reduce) { .starfield-dot { animation: none; } }
+
+/* The project view's rail (components/project-view.tsx): work travelling down through the system. */
+.project-rail::before, .project-rail::after {
+  content: ""; position: absolute; left: -2px; width: 5px; height: 5px; border-radius: 9999px;
+  background: #fdba74; box-shadow: 0 0 10px 2px rgba(249,115,22,.7); animation: rail-pulse 2.8s linear infinite;
+}
+.project-rail::after { animation-delay: -1.4s; }
+@keyframes rail-pulse { 0% { top: 0; opacity: 0 } 8% { opacity: 1 } 92% { opacity: 1 } 100% { top: 100%; opacity: 0 } }
+@media (prefers-reduced-motion: reduce) { .project-rail::before, .project-rail::after { animation: none; opacity: 0; } }

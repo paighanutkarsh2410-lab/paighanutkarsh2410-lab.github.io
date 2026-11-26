@@ -5,11 +5,11 @@ import { MagicCard } from "@/components/ui/magic-card";
 import { Reveal } from "@/components/motion/reveal";
 
 const STATS = [
-  { value: 1182, suffix: "", label: "of 1,182 viewers served under k6 load", tag: "Pitwall" },
-  { value: 205, suffix: " ms", label: "p99 latency at peak", tag: "Pitwall" },
+  { value: 1182, suffix: "", label: "of 1,182 browser connections held in a local k6 test", tag: "Pitwall" },
+  { value: 205, suffix: " ms", label: "p99 gap between screen updates in that test", tag: "Pitwall" },
   { value: 5, suffix: " SLOs", label: "with multi-window burn-rate alerts", tag: "Pitwall" },
   { value: 8, suffix: " agents", label: "detect, diagnose and remediate", tag: "SentryAI" },
-  { value: 90, suffix: " races", label: "of real F1 telemetry, replayable", tag: "Pitwall" },
+  { value: 91, suffix: " races", label: "of real F1 telemetry, replayable", tag: "Pitwall" },
   { value: 0, suffix: "", label: "unsigned images admitted to the cluster", tag: "Dishpatch" },
 ];
 
