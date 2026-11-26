@@ -113,7 +113,7 @@ h1, h2, h3 { margin: 0; font-weight: 400; }
 .trace__dots circle { fill: var(--ink); }
 .trace__labels { position: absolute; inset: 0; pointer-events: none; font: 500 0.7rem/1.2 var(--mono); letter-spacing: 0.06em; }
 .tl { position: absolute; white-space: nowrap; color: var(--dim); opacity: 0; transform: translateX(0.6rem); }
-.tl--axis { left: var(--gutter); top: -1.6rem; opacity: 1; color: var(--faint); }
+.tl--axis { left: var(--gutter); top: -1.6rem; color: var(--faint); }
 .tl--you { left: var(--gutter); top: calc(75% + 0.9rem); opacity: 1; }
 .tl--kill { top: 0.2rem; color: var(--red); }
 .tl--alert { top: 1.5rem; color: var(--ink); background: rgb(255 74 61 / 0.16); border: 1px solid rgb(255 74 61 / 0.45); padding: 0.25rem 0.5rem; }

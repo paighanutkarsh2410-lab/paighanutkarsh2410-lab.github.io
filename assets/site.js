@@ -160,6 +160,8 @@
     show(".trace__mark--back, .tl--back", p >= 0.4);
     show(".tl--fresh", p >= 0.555);
     $(".tl--you").style.opacity = String(1 - clamp01((p - 0.06) / 0.06));
+    // The chart's key waits until the introduction has made room for it.
+    $(".tl--axis").style.opacity = String(clamp01((p - 0.07) / 0.05));
     // The hand-over: the line steps back, four services come up.
     const hand = clamp01((p - 0.74) / 0.12);
     trace.style.opacity = (1 - hand * 0.82).toFixed(3);
